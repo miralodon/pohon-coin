@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Mini Game Tanam Pohon</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #e0f7fa; padding-top: 50px; }
+        .game-container { background: white; width: 300px; margin: 0 auto; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        #plant { font-size: 80px; transition: transform 0.3s; margin: 20px 0; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .progress-container { background: #eee; border-radius: 10px; height: 20px; width: 100%; margin: 15px 0; overflow: hidden; }
+        #progress-bar { background: #4caf50; height: 100%; width: 0%; transition: width 0.3s; }
+        
+        .stats { display: flex; justify-content: space-around; font-weight: bold; margin-bottom: 20px; }
+        button { background: #008cba; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="stats">
+        <div>💧 Air: <span id="water">50</span></div>
+        <div>💰 Koin: <span id="coins">0</span></div>
+    </div>
+
+    <div id="plant">🌱</div>
+    <p id="status">Tanam bibitmu!</p>
+
+    <div class="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <button onclick="waterPlant()" id="btn-sirams">Siram Tanaman (10💧)</button>
+    <p><small>Klik untuk menyiram dan melihatnya tumbuh!</small></p>
+</div>
+
+<script>
+    let water = 50;
+    let coins = 0;
+    let progress = 0;
+    let stage = 0; // 0: Bibit, 1: Tunas, 2: Pohon, 3: Panen
+
+    const plantIcons = ["🌱", "🌿", "🌳", "🍎"];
+    const statusTexts = ["Masih bibit...", "Wah, mulai tumbuh!", "Sudah besar!", "Waktunya Panen!"];
+
+    function waterPlant() {
+        if (water >= 10) {
+            // Kurangi air, tambah progres
+            water -= 10;
+            progress += 25;
+            
+            // Animasi goyang
+            const plantEl = document.getElementById('plant');
+            plantEl.classList.add('shake');
+            setTimeout(() => plantEl.classList.remove('shake'), 500);
+
+            // Cek perubahan tahap (Evolution)
+            if (progress >= 100) {
+                if (stage < 3) {
+                    stage++;
+                    progress = 0;
+                    if (stage === 3) {
+                        finishHarvest();
+                    }
+                }
+            }
+
+            updateUI();
+        } else {
+            alert("Air habis! Tunggu besok atau beli lagi.");
+        }
+    }
+
+    function finishHarvest() {
+        coins += 100;
+        document.getElementById('status').innerText = "Selamat! Kamu dapat 100 Koin!";
+        document.getElementById('btn-sirams').disabled = true;
+        setTimeout(() => {
+            // Reset game setelah 3 detik
+            if(confirm("Panen selesai! Mau tanam lagi?")) {
+                stage = 0;
+                progress = 0;
+                water = 50;
+                updateUI();
+                document.getElementById('btn-sirams').disabled = false;
+            }
+        }, 1000);
+    }
+
+    function updateUI() {
+        document.getElementById('water').innerText = water;
+        document.getElementById('coins').innerText = coins;
+        document.getElementById('progress-bar').style.width = progress + "%";
+        document.getElementById('plant').innerText = plantIcons[stage];
+        if (stage < 3) {
+            document.getElementById('status').innerText = statusTexts[stage];
+        }
+    }
+</script>
+
+</body>
+</html>
